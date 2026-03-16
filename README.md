@@ -54,6 +54,8 @@ tree /data
 sudo chown -R 1000:1000 /data
 sudo chmod -R a=,a+rX,u+w,g+w /data
 ls -ln /data
+
+If you want to store downloads and libraries on an HDD, set `MEDIA_ROOT` in `.env` to that mount point instead of `/data`, for example `/mnt/external-hdd/data`. Keep both `torrents` and `media` under the same `MEDIA_ROOT` so hardlinks continue to work.
 ```
 *(If you use torrents + Usenet client like NZBGet or SABnzbd then you need to use 
 `mkdir -p /data/{usenet/{incomplete,complete}/{tv,movies,music},media/{tv,movies,music}}` instead in that 1st first line)*  <br /> <br />

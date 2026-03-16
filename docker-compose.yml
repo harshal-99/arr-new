@@ -26,8 +26,8 @@ services:
       - "7878:7878"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/radarr:/config
-      - /data:/data
+      - ${APPDATA_ROOT:-/docker/appdata}/radarr:/config
+      - ${MEDIA_ROOT:-/data}:/data
 
 ###############################################
 # SONARR - TV Shows
@@ -40,8 +40,8 @@ services:
       - "8989:8989"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/sonarr:/config
-      - /data:/data
+      - ${APPDATA_ROOT:-/docker/appdata}/sonarr:/config
+      - ${MEDIA_ROOT:-/data}:/data
 
 ###############################################
 # LIDARR - Music
@@ -54,8 +54,8 @@ services:
       - "8686:8686"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/lidarr:/config
-      - /data:/data
+      - ${APPDATA_ROOT:-/docker/appdata}/lidarr:/config
+      - ${MEDIA_ROOT:-/data}:/data
 
 ###############################################
 # BAZARR - Subtitles
@@ -68,8 +68,8 @@ services:
       - "6767:6767"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/bazarr:/config
-      - /data/media:/data/media
+      - ${APPDATA_ROOT:-/docker/appdata}/bazarr:/config
+      - ${MEDIA_ROOT:-/data}/media:/data/media
 
 ###############################################
 # PROWLARR - Indexer Manager
@@ -82,7 +82,7 @@ services:
       - "9696:9696"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/prowlarr:/config
+      - ${APPDATA_ROOT:-/docker/appdata}/prowlarr:/config
 
 ###############################################
 # QBITTORRENT - Downloader
@@ -100,8 +100,8 @@ services:
       TORRENTING_PORT: 6881
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/qbittorrent:/config
-      - /data:/data
+      - ${APPDATA_ROOT:-/docker/appdata}/qbittorrent:/config
+      - ${MEDIA_ROOT:-/data}:/data
 
   profilarr:
     <<: *common-keys
@@ -125,8 +125,8 @@ services:
       - "8096:8096"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/jellyfin:/config
-      - /data/media:/data/media:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/jellyfin:/config
+      - ${MEDIA_ROOT:-/data}/media:/data/media:ro
 
 ###############################################
 # TAILSCALE - Secure Remote Access for Jellyfin
