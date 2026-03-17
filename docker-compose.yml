@@ -121,6 +121,11 @@ services:
     <<: *common-keys
     container_name: jellyfin
     image: ghcr.io/hotio/jellyfin:latest
+    group_add:
+      - "992"  # render
+      - "44"   # video
+    devices:
+      - /dev/dri:/dev/dri
     ports:
       - "8096:8096"
     volumes:
