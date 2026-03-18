@@ -30,6 +30,29 @@ services:
       - /data:/data
 
 ###############################################
+# TAILSCALE - Secure Remote Access for Radarr
+###############################################
+  tailscale-radarr:
+    container_name: tailscale-radarr
+    image: tailscale/tailscale:latest
+    restart: unless-stopped
+    network_mode: "service:radarr"
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=radarr-media-server
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_ACCEPT_DNS=false
+    volumes:
+      - tailscale-radarr-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      - radarr
+
+###############################################
 # SONARR - TV Shows
 ###############################################
   sonarr:
@@ -42,6 +65,29 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /docker/appdata/sonarr:/config
       - /data:/data
+
+###############################################
+# TAILSCALE - Secure Remote Access for Sonarr
+###############################################
+  tailscale-sonarr:
+    container_name: tailscale-sonarr
+    image: tailscale/tailscale:latest
+    restart: unless-stopped
+    network_mode: "service:sonarr"
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=sonarr-media-server
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_ACCEPT_DNS=false
+    volumes:
+      - tailscale-sonarr-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      - sonarr
 
 ###############################################
 # LIDARR - Music
@@ -124,6 +170,7 @@ services:
     group_add:
       - "992"  # render
       - "44"   # video
+    # Requires the native Linux Docker daemon; Docker Desktop's VM cannot see the host /dev/dri nodes.
     devices:
       - /dev/dri:/dev/dri
     ports:
@@ -173,6 +220,8 @@ services:
 ###############################################
 volumes:
   tailscale-jellyfin-state:
+  tailscale-radarr-state:
+  tailscale-sonarr-state:
 
 networks:
   default:
