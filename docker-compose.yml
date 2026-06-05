@@ -92,30 +92,30 @@ services:
 ###############################################
 # LIDARR - Music
 ###############################################
-  lidarr:
-    <<: *common-keys
-    container_name: lidarr
-    image: ghcr.io/hotio/lidarr:latest
-    ports:
-      - "8686:8686"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${APPDATA_ROOT:-/docker/appdata}/lidarr:/config
-      - ${MEDIA_ROOT:-/data}:/data
+  # lidarr:
+  #   <<: *common-keys
+  #   container_name: lidarr
+  #   image: ghcr.io/hotio/lidarr:latest
+  #   ports:
+  #     - "8686:8686"
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${APPDATA_ROOT:-/docker/appdata}/lidarr:/config
+  #     - ${MEDIA_ROOT:-/data}:/data
 
 ###############################################
 # BAZARR - Subtitles
 ###############################################
-  bazarr:
-    <<: *common-keys
-    container_name: bazarr
-    image: ghcr.io/hotio/bazarr:latest
-    ports:
-      - "6767:6767"
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${APPDATA_ROOT:-/docker/appdata}/bazarr:/config
-      - ${MEDIA_ROOT:-/data}/media:/data/media
+  # bazarr:
+  #   <<: *common-keys
+  #   container_name: bazarr
+  #   image: ghcr.io/hotio/bazarr:latest
+  #   ports:
+  #     - "6767:6767"
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${APPDATA_ROOT:-/docker/appdata}/bazarr:/config
+  #     - ${MEDIA_ROOT:-/data}/media:/data/media
 
 ###############################################
 # PROWLARR - Indexer Manager
@@ -160,6 +160,50 @@ services:
     depends_on:
       - sonarr
       - radarr
+
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    pid: host
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+###############################################
+# TAILSCALE - Secure Remote Access for Netdata
+###############################################
+  tailscale-netdata:
+    container_name: tailscale-netdata
+    image: tailscale/tailscale:latest
+    restart: unless-stopped
+    network_mode: "service:netdata"
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=netdata-media-server
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_ACCEPT_DNS=false
+    volumes:
+      - tailscale-netdata-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      - netdata
+
 ###############################################
 # JELLYFIN - Media Server
 ###############################################
@@ -222,6 +266,10 @@ volumes:
   tailscale-jellyfin-state:
   tailscale-radarr-state:
   tailscale-sonarr-state:
+  tailscale-netdata-state:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
 
 networks:
   default:
