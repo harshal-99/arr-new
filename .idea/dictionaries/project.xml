@@ -10,6 +10,7 @@
       <w>qbittorrent</w>
       <w>radarr</w>
       <w>sonarr</w>
+      <w>tdarr</w>
     </words>
   </dictionary>
 </component>
