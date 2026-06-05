@@ -182,29 +182,6 @@ services:
 
 
 ###############################################
-# TAILSCALE - Secure Remote Access for Netdata
-###############################################
-  tailscale-netdata:
-    container_name: tailscale-netdata
-    image: tailscale/tailscale:latest
-    restart: unless-stopped
-    network_mode: "service:netdata"
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_HOSTNAME=netdata-media-server
-      - TS_STATE_DIR=/var/lib/tailscale
-      - TS_USERSPACE=false
-      - TS_ACCEPT_DNS=false
-    volumes:
-      - tailscale-netdata-state:/var/lib/tailscale
-      - /dev/net/tun:/dev/net/tun
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    depends_on:
-      - netdata
-
-###############################################
 # JELLYFIN - Media Server
 ###############################################
   jellyfin:
