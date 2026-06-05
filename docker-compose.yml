@@ -201,6 +201,35 @@ services:
       - ${APPDATA_ROOT:-/docker/appdata}/jellyfin:/config
       - ${MEDIA_ROOT:-/data}/media:/data/media:ro
 
+  tdarr:
+    <<: *common-keys
+    image: ghcr.io/haveagitgat/tdarr
+    container_name: tdarr
+    group_add:
+      - "992"  # render
+      - "44"   # video
+    ports:
+      - "8265:8265" # Web UI
+      - "8266:8266" # Server node port
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Kolkata
+      serverIP: 0.0.0.0
+      serverPort: 8266
+      webUIPort: 8265
+      internalNode: true
+      nodeName: N150_Worker
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/tdarr/server:/app/server
+      - ${APPDATA_ROOT:-/docker/appdata}/tdarr/configs:/app/configs
+      - ${APPDATA_ROOT:-/docker/appdata}/tdarr/logs:/app/logs
+      - ${MEDIA_ROOT:-/data}/media:/data/media
+      - ${TDARR_TRANSCODE_ROOT:-/tmp/tdarr-transcode}:/temp
+    devices:
+      # This explicitly grants access to the Intel Quick Sync GPU
+      - /dev/dri:/dev/dri
 ###############################################
 # TAILSCALE - Secure Remote Access for Jellyfin
 ###############################################

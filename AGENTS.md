@@ -15,6 +15,18 @@ Use Docker Compose as the primary workflow:
 
 Run validation before opening a PR, especially after changing ports, volumes, environment variables, or `depends_on`.
 
+## Docker Container Access
+Use the native Linux Docker daemon for this stack. The startup script pins the native context with `DOCKER_CONTEXT=default`, so prefer explicit context commands when inspecting or controlling running containers:
+
+- `docker --context default compose ps` lists stack containers.
+- `docker --context default compose logs -f tdarr` tails logs for a specific service.
+- `docker --context default exec tdarr sh -lc 'ls -la /data/media'` runs a command inside a container.
+- `docker --context default inspect tdarr` shows mounts, devices, groups, and runtime metadata.
+
+Do not use `sudo` for normal Docker operations when the `harshal` user is in the `docker` group. Use escalation only for host setup tasks such as creating directories under `/docker/appdata`, changing ownership, or editing runtime database files directly.
+
+When configuring apps in their web UIs, use container paths rather than host paths. For example, Tdarr sees the media library as `/data/media` and the transcode cache as `/temp`; it does not see `/mnt/hdd/data/media` or `/tmp/tdarr-transcode` from inside the container.
+
 ## Coding Style & Naming Conventions
 Use 2-space indentation in `docker-compose.yml`, matching the existing file. Keep service names, container names, volume mounts, and network aliases lowercase with hyphens only where the upstream service already uses them, for example `tailscale-jellyfin`.
 
