@@ -266,6 +266,19 @@ services:
       LOG_LEVEL: info
 
 ###############################################
+# SEERR - Media Request and Discovery
+###############################################
+  seerr:
+    <<: *common-keys
+    container_name: seerr
+    image: ghcr.io/seerr-team/seerr:latest
+    ports:
+      - "5055:5055"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/seerr:/app/config
+
+###############################################
 # ARR Stack Dedicated Network
 ###############################################
 volumes:
