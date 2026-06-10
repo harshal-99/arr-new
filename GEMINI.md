@@ -20,7 +20,7 @@ The stack follows the **Shared Storage Pattern**, where all media-related contai
 - **Media Acquisition**: Radarr (Movies), Sonarr (TV), Lidarr (Music), Bazarr (Subtitles).
 - **Indexing & Management**: Prowlarr (Indexer Manager), Profilarr (Profile Manager).
 - **Downloaders**: qBittorrent (BitTorrent client), FlareSolverr (Cloudflare bypass).
-- **Serving & Access**: Jellyfin (Media Server), Tailscale (Remote Access sidecar for Jellyfin).
+- **Serving & Access**: Jellyfin (Media Server), Tailscale (Remote Access sidecar for Jellyfin), Seerr (Media Request and Discovery).
 
 ## Building and Running
 
@@ -52,7 +52,7 @@ The `docker-compose.yml` is the "source of truth" for the stack. Use the `x-comm
 | Sonarr       | 8989 | Lidarr        | 8686 |
 | Bazarr       | 6767 | Prowlarr      | 9696 |
 | Jellyfin     | 8096 | Profilarr     | 6868 |
-| FlareSolverr | 8191 |               |      |
+| FlareSolverr | 8191 | Seerr         | 5055 |
 
 ### Hardlinks & Atomic Moves
 To ensure hardlinks work:

@@ -278,6 +278,60 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA_ROOT:-/docker/appdata}/seerr:/app/config
 
+
+###############################################
+# ADGUARDHOME - DNS & Ad-blocking
+###############################################
+  adguardhome:
+    <<: *common-keys
+    container_name: adguardhome
+    image: adguard/adguardhome:latest
+    ports:
+      - "192.168.0.19:53:53/tcp"
+      - "192.168.0.19:53:53/udp"
+      - "100.104.142.22:53:53/tcp"
+      - "100.104.142.22:53:53/udp"
+      - "3000:3000/tcp"
+      - "8085:80/tcp"
+    volumes:
+      - ${APPDATA_ROOT:-/docker/appdata}/adguardhome/work:/opt/adguardhome/work
+      - ${APPDATA_ROOT:-/docker/appdata}/adguardhome/conf:/opt/adguardhome/conf
+
+###############################################
+# BESZEL - Resource Monitoring Hub & Agent
+###############################################
+  beszel:
+    <<: *common-keys
+    container_name: beszel
+    image: henrygd/beszel:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ${APPDATA_ROOT:-/docker/appdata}/beszel:/beszel_data
+      - beszel_socket:/beszel_socket
+
+  beszel-agent:
+    container_name: beszel-agent
+    image: henrygd/beszel-agent-intel
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+      - CAP_PERFMON
+    devices:
+      - /dev/sda:/dev/sda
+      - /dev/nvme0:/dev/nvme0
+      - /dev/nvme0n1:/dev/nvme0n1
+      - /dev/dri/card1:/dev/dri/card1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - beszel_socket:/beszel_socket
+    environment:
+      PORT: 45876
+      LISTEN: /beszel_socket/beszel.sock
+      KEY: ${BESZEL_KEY:-}
+
 ###############################################
 # ARR Stack Dedicated Network
 ###############################################
@@ -289,6 +343,7 @@ volumes:
   netdataconfig:
   netdatalib:
   netdatacache:
+  beszel_socket:
 
 networks:
   default:

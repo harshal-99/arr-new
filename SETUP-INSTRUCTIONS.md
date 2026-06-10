@@ -92,6 +92,7 @@ systemctl --user enable arr-stack.service
 8. **jellyfin** - Media Server (port 8096)
 9. **tailscale-jellyfin** - Secure Remote Access
 10. **flaresolverr** - Cloudflare Bypass (port 8191)
+11. **seerr** - Media Request and Discovery (port 5055)
 
 ## Troubleshooting
 
