@@ -323,7 +323,7 @@ services:
       - /dev/sda:/dev/sda
       - /dev/nvme0:/dev/nvme0
       - /dev/nvme0n1:/dev/nvme0n1
-      - /dev/dri/card1:/dev/dri/card1
+      - /dev/dri:/dev/dri
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - beszel_socket:/beszel_socket
