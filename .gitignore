@@ -1,2 +1,3 @@
 profilarr
 .env
+*.log

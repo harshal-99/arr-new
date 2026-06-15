@@ -1,0 +1,16 @@
+title: "ARR Media Dashboard"
+description: "Self-Hosted Media Stack Services"
+
+layout:
+  Media Management:
+    style: row
+    columns: 4
+  Indexers & Downloads:
+    style: row
+    columns: 3
+  Streaming & Processing:
+    style: row
+    columns: 2
+  Infrastructure & Monitoring:
+    style: row
+    columns: 3

@@ -1,0 +1,123 @@
+- Media Management:
+    - Radarr:
+        icon: radarr
+        href: http://radarr.localhost:8088
+        description: Movie management
+        server: my-docker
+        container: radarr
+        widget:
+          type: radarr
+          url: http://radarr:7878
+          key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
+
+    - Sonarr:
+        icon: sonarr
+        href: http://sonarr.localhost:8088
+        description: TV show management
+        server: my-docker
+        container: sonarr
+        widget:
+          type: sonarr
+          url: http://sonarr:8989
+          key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
+
+    - Seerr:
+        icon: overseerr
+        href: http://seerr.localhost:8088
+        description: Media requests & discovery
+        server: my-docker
+        container: seerr
+        widget:
+          type: seerr
+          url: http://seerr:5055
+          key: "{{HOMEPAGE_VAR_SEERR_API_KEY}}"
+
+    - Profilarr:
+        icon: profilarr
+        href: http://profilarr.localhost:8088
+        description: Profile manager
+        server: my-docker
+        container: profilarr
+
+- Indexers & Downloads:
+    - Prowlarr:
+        icon: prowlarr
+        href: http://prowlarr.localhost:8088
+        description: Indexer management
+        server: my-docker
+        container: prowlarr
+        widget:
+          type: prowlarr
+          url: http://prowlarr:9696
+          key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
+
+    - qBittorrent:
+        icon: qbittorrent
+        href: http://qbittorrent.localhost:8088
+        description: Torrent client
+        server: my-docker
+        container: qbittorrent
+        widget:
+          type: qbittorrent
+          url: http://qbittorrent:8080
+          username: "{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}"
+
+    - Flaresolverr:
+        icon: flaresolverr
+        href: http://flaresolverr.localhost:8088
+        description: Cloudflare bypass
+        server: my-docker
+        container: flaresolverr
+
+- Streaming & Processing:
+    - Jellyfin:
+        icon: jellyfin
+        href: http://jellyfin.localhost:8088
+        description: Media server
+        server: my-docker
+        container: jellyfin
+        widget:
+          type: jellyfin
+          url: http://jellyfin:8096
+          key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
+
+    - Tdarr:
+        icon: tdarr
+        href: http://tdarr.localhost:8088
+        description: Transcoding UI
+        server: my-docker
+        container: tdarr
+        widget:
+          type: tdarr
+          url: http://tdarr:8265
+
+- Infrastructure & Monitoring:
+    - AdGuard Home:
+        icon: adguard-home
+        href: http://adguard.localhost:8088
+        description: DNS & Ad-blocker
+        server: my-docker
+        container: adguardhome
+        widget:
+          type: adguard
+          url: http://adguardhome:80
+          username: "{{HOMEPAGE_VAR_ADGUARD_USERNAME}}"
+          password: "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}"
+
+    - Beszel:
+        icon: beszel
+        href: http://beszel.localhost:8088
+        description: Resource monitor
+        server: my-docker
+        container: beszel
+
+    - Netdata:
+        icon: netdata
+        href: http://localhost:19999
+        description: System performance
+        server: my-docker
+        container: netdata
+        widget:
+          type: netdata
+          url: http://host.docker.internal:19999
