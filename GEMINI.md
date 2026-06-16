@@ -34,10 +34,10 @@ The stack follows the **Shared Storage Pattern**, where all media-related contai
 - `TS_AUTHKEY` is required for Tailscale remote access.
 
 ### Common Commands
-- **Start all services**: `docker compose up -d`
-- **Stop all services**: `docker compose down`
-- **Check status**: `docker ps` or `systemctl --user status arr-stack.service`
-- **View logs**: `docker compose logs -f <service-name>`
+- **Start all services**: `docker --context default compose up -d`
+- **Stop all services**: `docker --context default compose down`
+- **Check status**: `docker --context default ps` or `systemctl --user status arr-stack.service`
+- **View logs**: `docker --context default compose logs -f <service-name>`
 - **Bootstrap script**: `./start-arr-stack.sh` (waits for Docker daemon before starting stack).
 
 ## Development & Configuration Guidelines
