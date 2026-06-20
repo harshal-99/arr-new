@@ -130,16 +130,22 @@ services:
 ###############################################
 # BAZARR - Subtitles
 ###############################################
-  # bazarr:
-  #   <<: *common-keys
-  #   container_name: bazarr
-  #   image: ghcr.io/hotio/bazarr:latest
-  #   ports:
-  #     - "6767:6767"
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - ${APPDATA_ROOT:-/docker/appdata}/bazarr:/config
-  #     - ${MEDIA_ROOT:-/data}/media:/data/media
+  bazarr:
+    <<: *common-keys
+    container_name: bazarr
+    image: ghcr.io/hotio/bazarr:latest
+    ports:
+      - "6767:6767"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/bazarr:/config
+      - ${MEDIA_ROOT:-/data}/media:/data/media
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-L", "http://localhost:6767/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 ###############################################
 # PROWLARR - Indexer Manager
@@ -449,6 +455,7 @@ services:
       HOMEPAGE_VAR_PROWLARR_API_KEY: ${PROWLARR_API_KEY:-}
       HOMEPAGE_VAR_JELLYFIN_API_KEY: ${JELLYFIN_API_KEY:-}
       HOMEPAGE_VAR_SEERR_API_KEY: ${SEERR_API_KEY:-}
+      HOMEPAGE_VAR_BAZARR_API_KEY: ${BAZARR_API_KEY:-}
       HOMEPAGE_VAR_QBITTORRENT_USERNAME: ${QBITTORRENT_USERNAME:-admin}
       HOMEPAGE_VAR_QBITTORRENT_PASSWORD: ${QBITTORRENT_PASSWORD:-adminadmin}
       HOMEPAGE_VAR_ADGUARD_USERNAME: ${ADGUARD_USERNAME:-admin}

@@ -1,7 +1,7 @@
 - Media Management:
     - Radarr:
         icon: radarr
-        href: http://radarr.localhost:8088
+        href: http://radarr.lan
         description: Movie management
         server: my-docker
         container: radarr
@@ -12,7 +12,7 @@
 
     - Sonarr:
         icon: sonarr
-        href: http://sonarr.localhost:8088
+        href: http://sonarr.lan
         description: TV show management
         server: my-docker
         container: sonarr
@@ -23,7 +23,7 @@
 
     - Seerr:
         icon: overseerr
-        href: http://seerr.localhost:8088
+        href: http://seerr.lan
         description: Media requests & discovery
         server: my-docker
         container: seerr
@@ -34,15 +34,26 @@
 
     - Profilarr:
         icon: profilarr
-        href: http://profilarr.localhost:8088
+        href: http://profilarr.lan
         description: Profile manager
         server: my-docker
         container: profilarr
 
+    - Bazarr:
+        icon: bazarr
+        href: http://bazarr.lan
+        description: Subtitle management
+        server: my-docker
+        container: bazarr
+        widget:
+          type: bazarr
+          url: http://bazarr:6767
+          key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
+
 - Indexers & Downloads:
     - Prowlarr:
         icon: prowlarr
-        href: http://prowlarr.localhost:8088
+        href: http://prowlarr.lan
         description: Indexer management
         server: my-docker
         container: prowlarr
@@ -53,7 +64,7 @@
 
     - qBittorrent:
         icon: qbittorrent
-        href: http://qbittorrent.localhost:8088
+        href: http://qbittorrent.lan
         description: Torrent client
         server: my-docker
         container: qbittorrent
@@ -65,7 +76,7 @@
 
     - Flaresolverr:
         icon: flaresolverr
-        href: http://flaresolverr.localhost:8088
+        href: http://flaresolverr.lan
         description: Cloudflare bypass
         server: my-docker
         container: flaresolverr
@@ -73,7 +84,7 @@
 - Streaming & Processing:
     - Jellyfin:
         icon: jellyfin
-        href: http://jellyfin.localhost:8088
+        href: http://jellyfin.lan
         description: Media server
         server: my-docker
         container: jellyfin
@@ -84,7 +95,7 @@
 
     - Tdarr:
         icon: tdarr
-        href: http://tdarr.localhost:8088
+        href: http://tdarr.lan
         description: Transcoding UI
         server: my-docker
         container: tdarr
@@ -95,7 +106,7 @@
 - Infrastructure & Monitoring:
     - AdGuard Home:
         icon: adguard-home
-        href: http://adguard.localhost:8088
+        href: http://adguard.lan
         description: DNS & Ad-blocker
         server: my-docker
         container: adguardhome
@@ -107,7 +118,7 @@
 
     - Beszel:
         icon: beszel
-        href: http://beszel.localhost:8088
+        href: http://beszel.lan
         description: Resource monitor
         server: my-docker
         container: beszel
