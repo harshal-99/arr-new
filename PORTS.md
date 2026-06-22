@@ -18,7 +18,6 @@ Quick local reference for the services in this Compose stack.
 | AdGuard Home | http://adguard.lan | DNS and ad-blocking (Initial setup: port 3000, Web UI: port 8085) |
 | Beszel | http://beszel.lan | Resource monitoring hub (Web UI: port 8090) |
 | Netdata | http://localhost:19999 | Host monitoring, uses host networking |
-| Glances | http://localhost:61208 | Host monitoring, currently running |
 
 ## Non-UI Ports
 
@@ -39,4 +38,4 @@ docker --context default compose config --quiet
 docker --context default compose logs -f <service>
 ```
 
-`glances` is listed here because it is currently running in Docker, but it is not defined in `docker-compose.yml`. If `radarr.lan` style names do not resolve on your machine, add them to `/etc/hosts` pointing at `127.0.0.1` (or your DNS server / host IP). The Apache reverse proxy listens on port 80.
+If `radarr.lan` style names do not resolve on your machine, add them to `/etc/hosts` pointing at `127.0.0.1` (or your DNS server / host IP). The Apache reverse proxy listens on port 80.
