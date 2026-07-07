@@ -412,14 +412,13 @@ services:
       - CAP_PERFMON
     devices:
       - /dev/sda:/dev/sda
-      - /dev/sdb:/dev/sdb
       - /dev/nvme0:/dev/nvme0
       - /dev/nvme0n1:/dev/nvme0n1
       - /dev/dri:/dev/dri
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - beszel_socket:/beszel_socket
-      - /mnt/hdd:/extra-filesystems/sdb1__HDD:ro
+      - /mnt/hdd:/extra-filesystems/sda1__HDD:ro
     environment:
       PORT: 45876
       LISTEN: /beszel_socket/beszel.sock
