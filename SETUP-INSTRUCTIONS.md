@@ -2,7 +2,7 @@
 
 ## Current Status
 ✅ Systemd service created: `~/.config/systemd/user/arr-stack.service`
-✅ Startup script created: `~/arr-new/start-arr-stack.sh`
+✅ Startup script created: `~/arr-new/scripts/start-arr-stack.sh`
 ✅ Service enabled for auto-start
 ⚠️ **BLOCKED**: User not in docker group (permission issue)
 
@@ -40,7 +40,7 @@ journalctl --user -u arr-stack.service
 
 ## What Was Configured
 
-### 1. Wrapper Script (`start-arr-stack.sh`)
+### 1. Wrapper Script (`scripts/start-arr-stack.sh`)
 - Waits up to 60 seconds for Docker to become ready
 - Polls `docker info` every 2 seconds
 - Runs `docker compose up -d` once Docker responds

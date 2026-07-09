@@ -38,7 +38,7 @@ The stack follows the **Shared Storage Pattern**, where all media-related contai
 - **Stop all services**: `docker --context default compose down`
 - **Check status**: `docker --context default ps` or `systemctl --user status arr-stack.service`
 - **View logs**: `docker --context default compose logs -f <service-name>`
-- **Bootstrap script**: `./start-arr-stack.sh` (waits for Docker daemon before starting stack).
+- **Bootstrap script**: `./scripts/start-arr-stack.sh` (waits for Docker daemon before starting stack).
 
 ## Development & Configuration Guidelines
 
@@ -64,5 +64,5 @@ The stack is managed by a systemd user service: `~/.config/systemd/user/arr-stac
 
 ## Troubleshooting
 - **Permissions**: Ensure `/data` and `/docker/appdata` are writable by UID 1000.
-- **Docker Readiness**: The `start-arr-stack.sh` script handles cases where the Docker daemon isn't ready immediately on boot.
+- **Docker Readiness**: The `scripts/start-arr-stack.sh` script handles cases where the Docker daemon isn't ready immediately on boot.
 - **Tailscale**: If Jellyfin is inaccessible remotely, check the `tailscale-jellyfin` logs and ensure a valid `TS_AUTHKEY` is provided.

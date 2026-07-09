@@ -5,12 +5,13 @@ set -euo pipefail
 
 # Ensure the script is run with root privileges
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Please run this script with sudo (e.g., sudo ./setup-apache-proxy.sh)" >&2
+  echo "Error: Please run this script with sudo (e.g., sudo ./scripts/setup-apache-proxy.sh)" >&2
   exit 1
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-CONFIG_SOURCE="${SCRIPT_DIR}/apache-arr.conf"
+APP_DIR="$(cd "$SCRIPT_DIR/.." &>/dev/null && pwd)"
+CONFIG_SOURCE="${APP_DIR}/apache-arr.conf"
 CONFIG_DEST="/etc/apache2/sites-available/arr-stack.conf"
 
 if [ ! -f "$CONFIG_SOURCE" ]; then

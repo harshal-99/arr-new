@@ -11,7 +11,10 @@ A Docker Compose-based home media server stack ("ARR stack") running on Linux. I
 - `docker-compose.yml` — the entire stack definition; this is the primary file to edit
 - `.env` — secrets (gitignored); only `TS_AUTHKEY` is required (for Tailscale)
 - `.env.sample` — template showing required env vars
-- `start-arr-stack.sh` — boot script that waits for Docker daemon then runs `docker compose up -d`
+- `scripts/start-arr-stack.sh` — boot script that waits for Docker daemon then runs `docker compose up -d`
+- `scripts/backup-and-update.sh` — script to back up configuration, pull updates, and restart services
+- `scripts/restore-backup.sh` — script to restore stack configurations from backups
+- `scripts/setup-apache-proxy.sh` — script to configure Apache reverse proxy
 - `~/.config/systemd/user/arr-stack.service` — systemd user service for auto-start on boot
 
 ## Common Commands
