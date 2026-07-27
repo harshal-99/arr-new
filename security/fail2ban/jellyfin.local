@@ -1,0 +1,13 @@
+[jellyfin]
+enabled = true
+port = http,https
+filter = jellyfin
+logpath = /docker/appdata/jellyfin/log/log_*.log
+maxretry = 5
+bantime = 24h
+findtime = 10m
+
+# DOCKER-USER chain integration
+# This is critical because Docker bypasses standard INPUT chains. 
+# It ensures blocks are evaluated for container traffic.
+action = iptables-allports[name=jellyfin, chain=DOCKER-USER]
