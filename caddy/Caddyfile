@@ -6,6 +6,19 @@
 # External HTTPS Reverse Proxy (Automatic TLS via Let's Encrypt)
 # =========================================================================
 {$DYNV6_HOSTNAME} {
+    # Security headers
+    header {
+        # Enable HSTS (Strict HTTPS)
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Prevent clickjacking
+        X-Frame-Options "SAMEORIGIN"
+        # Prevent MIME-sniffing
+        X-Content-Type-Options "nosniff"
+        # Control referrer privacy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        # Disable tracking
+        Permissions-Policy "interest-cohort=()"
+    }
     reverse_proxy 127.0.0.1:8096
 }
 
