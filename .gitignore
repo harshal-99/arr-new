@@ -1,3 +1,4 @@
 profilarr
 .env
 *.log
+jellyfin-serve.json
