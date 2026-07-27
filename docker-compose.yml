@@ -245,6 +245,7 @@ services:
       - /dev/dri:/dev/dri
     ports:
       - "8096:8096"
+      - "41651:41651/udp"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${APPDATA_ROOT:-/docker/appdata}/jellyfin:/config
@@ -305,9 +306,12 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_ACCEPT_DNS=false
+      - TSD_EXTRA_ARGS=--port=41651
+      - TS_SERVE_CONFIG=/config/serve.json
     volumes:
       - tailscale-jellyfin-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
+      - ./jellyfin-serve.json:/config/serve.json:ro
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
@@ -368,8 +372,6 @@ services:
     ports:
       - "192.168.0.19:53:53/tcp"
       - "192.168.0.19:53:53/udp"
-      - "100.104.142.22:53:53/tcp"
-      - "100.104.142.22:53:53/udp"
       - "3000:3000/tcp"
       - "8085:80/tcp"
     volumes:
@@ -469,6 +471,61 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+###############################################
+# DYNV6 UPDATER - DDNS Updater
+###############################################
+  dynv6-updater:
+    image: curlimages/curl:latest
+    container_name: dynv6-updater
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      DYNV6_TOKEN: ${DYNV6_TOKEN}
+      DYNV6_HOSTNAME: ${DYNV6_HOSTNAME}
+    entrypoint: >
+      sh -c '
+      if [ -z "$$DYNV6_TOKEN" ] || [ -z "$$DYNV6_HOSTNAME" ]; then
+        echo "ERROR: DYNV6_TOKEN or DYNV6_HOSTNAME is not set in .env";
+        while true; do sleep 3600; done;
+      fi;
+      echo "Starting dynv6 IPv6 DDNS updater for $$DYNV6_HOSTNAME...";
+      LAST_IP="";
+      while true; do
+        CURRENT_IP=$$(curl -6 -s --max-time 10 https://icanhazip.com || curl -s --max-time 10 https://ipv6.icanhazip.com);
+        if [ -z "$$CURRENT_IP" ]; then
+          echo "WARNING: Failed to retrieve current public IPv6. Retrying in 5 minutes...";
+          sleep 300;
+          continue;
+        fi;
+        if [ "$$CURRENT_IP" != "$$LAST_IP" ]; then
+          echo "IPv6 changed from \"$$LAST_IP\" to \"$$CURRENT_IP\". Updating dynv6 (clearing IPv4)...";
+          RESPONSE=$$(curl -6 -sS --max-time 15 "https://dynv6.com/api/update?hostname=$$DYNV6_HOSTNAME&ipv4=-&ipv6=auto&token=$$DYNV6_TOKEN");
+          echo "dynv6 response: $$RESPONSE";
+          if echo "$$RESPONSE" | grep -qE "updated|nochg|unchanged|addresses"; then
+            LAST_IP="$$CURRENT_IP";
+          fi;
+        else
+          echo "IPv6 address ($$CURRENT_IP) has not changed.";
+        fi;
+        sleep 600;
+      done
+      '
+
+###############################################
+# CADDY - Reverse Proxy with HTTPS
+###############################################
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      DYNV6_HOSTNAME: ${DYNV6_HOSTNAME}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/caddy/data:/data
+      - ${APPDATA_ROOT:-/docker/appdata}/caddy/config:/config
 
 ###############################################
 # ARR Stack Dedicated Network

@@ -1,0 +1,53 @@
+{
+    email admin@{$DYNV6_HOSTNAME}
+}
+
+# =========================================================================
+# External HTTPS Reverse Proxy (Automatic TLS via Let's Encrypt)
+# =========================================================================
+{$DYNV6_HOSTNAME} {
+    reverse_proxy 127.0.0.1:8096
+}
+
+# =========================================================================
+# Local HTTP Reverse Proxies (Replaces Apache)
+# =========================================================================
+http://radarr.localhost, http://radarr.lan {
+    reverse_proxy 127.0.0.1:7878
+}
+http://sonarr.localhost, http://sonarr.lan {
+    reverse_proxy 127.0.0.1:8989
+}
+http://bazarr.localhost, http://bazarr.lan {
+    reverse_proxy 127.0.0.1:6767
+}
+http://prowlarr.localhost, http://prowlarr.lan {
+    reverse_proxy 127.0.0.1:9696
+}
+http://qbittorrent.localhost, http://qbittorrent.lan {
+    reverse_proxy 127.0.0.1:8080
+}
+http://profilarr.localhost, http://profilarr.lan {
+    reverse_proxy 127.0.0.1:6868
+}
+http://jellyfin.localhost, http://jellyfin.lan {
+    reverse_proxy 127.0.0.1:8096
+}
+http://tdarr.localhost, http://tdarr.lan {
+    reverse_proxy 127.0.0.1:8265
+}
+http://flaresolverr.localhost, http://flaresolverr.lan {
+    reverse_proxy 127.0.0.1:8191
+}
+http://seerr.localhost, http://seerr.lan {
+    reverse_proxy 127.0.0.1:5055
+}
+http://adguard.localhost, http://adguard.lan {
+    reverse_proxy 127.0.0.1:8085
+}
+http://beszel.localhost, http://beszel.lan {
+    reverse_proxy 127.0.0.1:8090
+}
+http://homepage.localhost, http://homepage.lan {
+    reverse_proxy 127.0.0.1:3005
+}
