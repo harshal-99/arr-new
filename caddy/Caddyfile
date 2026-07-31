@@ -1,27 +1,3 @@
-{
-    email admin@{$DYNV6_HOSTNAME}
-}
-
-# =========================================================================
-# External HTTPS Reverse Proxy (Automatic TLS via Let's Encrypt)
-# =========================================================================
-{$DYNV6_HOSTNAME} {
-    # Security headers
-    header {
-        # Enable HSTS (Strict HTTPS)
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        # Prevent clickjacking
-        X-Frame-Options "SAMEORIGIN"
-        # Prevent MIME-sniffing
-        X-Content-Type-Options "nosniff"
-        # Control referrer privacy
-        Referrer-Policy "strict-origin-when-cross-origin"
-        # Disable tracking
-        Permissions-Policy "interest-cohort=()"
-    }
-    reverse_proxy 127.0.0.1:8096
-}
-
 # =========================================================================
 # Local HTTP Reverse Proxies (Replaces Apache)
 # =========================================================================
@@ -36,6 +12,9 @@ http://bazarr.localhost, http://bazarr.lan {
 }
 http://prowlarr.localhost, http://prowlarr.lan {
     reverse_proxy 127.0.0.1:9696
+}
+http://jackett.localhost, http://jackett.lan {
+    reverse_proxy 127.0.0.1:9117
 }
 http://qbittorrent.localhost, http://qbittorrent.lan {
     reverse_proxy 127.0.0.1:8080
@@ -60,6 +39,9 @@ http://adguard.localhost, http://adguard.lan {
 }
 http://beszel.localhost, http://beszel.lan {
     reverse_proxy 127.0.0.1:8090
+}
+http://uptime.localhost, http://uptime.lan {
+    reverse_proxy 127.0.0.1:3001
 }
 http://homepage.localhost, http://homepage.lan {
     reverse_proxy 127.0.0.1:3005

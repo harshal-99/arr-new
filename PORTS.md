@@ -17,6 +17,7 @@ Quick local reference for the services in this Compose stack.
 | Seerr | http://seerr.lan | Requests and discovery |
 | AdGuard Home | http://adguard.lan | DNS and ad-blocking (Initial setup: port 3000, Web UI: port 8085) |
 | Beszel | http://beszel.lan | Resource monitoring hub (Web UI: port 8090) |
+| Uptime Kuma | http://uptime.lan | Status monitoring dashboard (Web UI: port 3001) |
 | Netdata | http://localhost:19999 | Host monitoring, uses host networking |
 
 ## Non-UI Ports
