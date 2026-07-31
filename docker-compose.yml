@@ -182,7 +182,7 @@ services:
       - ${APPDATA_ROOT:-/docker/appdata}/jackett:/config
       - ${MEDIA_ROOT:-/data}/torrents:/downloads:rshared
     healthcheck:
-      test: ["CMD", "curl", "-f", "-L", "http://127.0.0.1:9117/"]
+      test: ["CMD", "curl", "-f", "-L", "-c", "/dev/null", "http://127.0.0.1:9117/"]
       interval: 60s
       timeout: 10s
       retries: 3
