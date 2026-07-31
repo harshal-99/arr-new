@@ -1,5 +1,5 @@
 # =========================================================================
-# Local HTTP Reverse Proxies (Replaces Apache)
+# Local HTTP Reverse Proxies
 # =========================================================================
 http://radarr.localhost, http://radarr.lan {
     reverse_proxy 127.0.0.1:7878
