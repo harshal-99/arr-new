@@ -62,6 +62,16 @@
           url: http://prowlarr:9696
           key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
 
+    - Jackett:
+        icon: jackett
+        href: http://jackett.lan
+        description: Indexer proxy
+        server: my-docker
+        container: jackett
+        widget:
+          type: jackett
+          url: http://jackett:9117
+
     - qBittorrent:
         icon: qbittorrent
         href: http://qbittorrent.lan
@@ -122,6 +132,16 @@
         description: Resource monitor
         server: my-docker
         container: beszel
+
+    - Uptime Kuma:
+        icon: uptime-kuma
+        href: http://uptime.lan
+        description: Status monitor
+        server: my-docker
+        container: uptime-kuma
+        widget:
+          type: uptimekuma
+          url: http://uptime-kuma:3001
 
     - Netdata:
         icon: netdata
