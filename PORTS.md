@@ -39,4 +39,4 @@ docker --context default compose config --quiet
 docker --context default compose logs -f <service>
 ```
 
-If `radarr.lan` style names do not resolve on your machine, add them to `/etc/hosts` pointing at `127.0.0.1` (or your DNS server / host IP). The Apache reverse proxy listens on port 80.
+If `radarr.lan` style names do not resolve on your machine, add them to `/etc/hosts` pointing at `127.0.0.1` (or your DNS server / host IP). The Caddy reverse proxy listens on port 80.
