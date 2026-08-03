@@ -149,6 +149,16 @@ services:
       start_period: 30s
 
 ###############################################
+# VPS PROXY TUNNEL - Tunnel to VPS over Tailscale
+###############################################
+  vps-proxy-tunnel:
+    image: alpine/socat:latest
+    container_name: vps-proxy-tunnel
+    network_mode: host
+    command: tcp-listen:1080,fork,reuseaddr tcp:100.79.189.34:1080
+    restart: unless-stopped
+
+###############################################
 # PROWLARR - Indexer Manager
 ###############################################
   prowlarr:
@@ -303,7 +313,7 @@ services:
       - ${APPDATA_ROOT:-/docker/appdata}/tdarr/server:/app/server
       - ${APPDATA_ROOT:-/docker/appdata}/tdarr/configs:/app/configs
       - ${APPDATA_ROOT:-/docker/appdata}/tdarr/logs:/app/logs
-      - ${MEDIA_ROOT:-/data}/media:/data/media:rshared
+      - ${MEDIA_ROOT:-/data}:/data:rshared
       - ${TDARR_TRANSCODE_ROOT:-/tmp/tdarr-transcode}:/temp
     devices:
       # This explicitly grants access to the Intel Quick Sync GPU
