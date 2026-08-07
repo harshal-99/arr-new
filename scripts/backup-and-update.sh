@@ -17,6 +17,12 @@ APPDATA_ROOT="/docker/appdata"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/arr_backup_${TIMESTAMP}.tar.gz"
 
+# Use pigz for multi-core compression if available, fallback to standard gzip
+COMPRESS_PROGRAM="gzip"
+if command -v pigz >/dev/null 2>&1; then
+  COMPRESS_PROGRAM="pigz"
+fi
+
 # Determine the non-root user who invoked sudo
 REAL_USER="${SUDO_USER:-harshal}"
 REAL_UID=$(id -u "$REAL_USER")
@@ -107,9 +113,9 @@ if [ ${#tar_targets[@]} -eq 0 ]; then
   exit 1
 fi
 
-log "Creating compressed tarball backup..."
+log "Creating compressed tarball backup (using ${COMPRESS_PROGRAM})..."
 # Exclude cache, log, and temp directories to optimize backup size
-tar -czf "$BACKUP_FILE" \
+tar -I "$COMPRESS_PROGRAM" -cf "$BACKUP_FILE" \
   --exclude="*/cache/*" \
   --exclude="*/Cache/*" \
   --exclude="*/logs/*" \
