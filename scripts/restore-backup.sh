@@ -28,6 +28,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 APP_DIR="$(cd "$SCRIPT_DIR/.." &>/dev/null && pwd)"
 APPDATA_ROOT="/docker/appdata"
 
+# Use pigz for multi-core decompression if available, fallback to standard gzip
+DECOMPRESS_PROGRAM="gzip"
+if command -v pigz >/dev/null 2>&1; then
+  DECOMPRESS_PROGRAM="pigz"
+fi
+
 # Determine the non-root user who invoked sudo
 REAL_USER="${SUDO_USER:-harshal}"
 REAL_UID=$(id -u "$REAL_USER")
@@ -97,8 +103,8 @@ backup_and_clear "${APP_DIR}/homepage/config"
 backup_and_clear "${APP_DIR}/profilarr/config"
 
 # 5. Extract the backup tarball
-log "Step 3: Extracting backup files..."
-tar -xzf "$BACKUP_FILE" -C /
+log "Step 3: Extracting backup files (using ${DECOMPRESS_PROGRAM})..."
+tar -I "$DECOMPRESS_PROGRAM" -xf "$BACKUP_FILE" -C /
 echo "Backup extraction complete."
 
 # 6. Ensure correct permissions
