@@ -55,7 +55,7 @@ wait_for_mount() {
     
     # Check if the mount path is in a stale/shutdown state returning Input/output error
     local ls_check
-    ls_check=$(ls -d "$mount_path" 2>&1 || true)
+    ls_check=$(ls "$mount_path" 2>&1 || true)
     if [[ "$ls_check" == *"Input/output error"* ]]; then
         local active_dev
         active_dev=$(readlink -f /dev/disk/by-uuid/684bd0de-c039-4704-8b99-f12e74b6e4f9 2>/dev/null || echo "/dev/sdc1")
@@ -80,7 +80,7 @@ wait_for_mount() {
             fi
             
             echo "Re-triggering automount..."
-            ls -d "$mount_path" >/dev/null 2>&1 || true
+            ls "$mount_path" >/dev/null 2>&1 || true
             
             # Check if mount is now healthy
             if [ -d "$mount_path/media" ] && [ -d "$mount_path/torrents" ]; then
@@ -99,7 +99,7 @@ wait_for_mount() {
     fi
 
     # Access directory to trigger systemd automount
-    ls -d "$mount_path" >/dev/null 2>&1
+    ls "$mount_path" >/dev/null 2>&1
     
     while [ $mount_counter -lt $mount_max_wait ]; do
         # Confirm the mount is loaded by checking if known subdirectories exist
@@ -109,7 +109,7 @@ wait_for_mount() {
         fi
         sleep 2
         mount_counter=$((mount_counter + 2))
-        ls -d "$mount_path" >/dev/null 2>&1
+        ls "$mount_path" >/dev/null 2>&1
     done
     return 1
 }
