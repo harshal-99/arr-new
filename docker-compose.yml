@@ -172,6 +172,8 @@ services:
       UPSTREAM_PORT: 1080
       LISTEN_HOST: 0.0.0.0
       LISTEN_PORT: 1081
+      UPSTREAM_USER: ${SOCKS5_UPSTREAM_USER:-prowlarr}
+      UPSTREAM_PASS: ${SOCKS5_UPSTREAM_PASS}
 
 ###############################################
 # PROWLARR - Indexer Manager
@@ -382,7 +384,7 @@ services:
       - "8191:8191"
     environment:
       LOG_LEVEL: info
-      PROXY: socks5://socks5-bridge:1081
+      # PROXY: socks5://socks5-bridge:1081
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8191/"]
       interval: 60s
@@ -467,7 +469,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - beszel_socket:/beszel_socket
-      - /mnt/hdd:/extra-filesystems/sda1__HDD:ro
+      - /mnt/hdd/data:/extra-filesystems/nas-data:ro
     environment:
       PORT: 45876
       LISTEN: /beszel_socket/beszel.sock
