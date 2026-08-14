@@ -24,7 +24,7 @@ check_container_mount() {
         # Try to list the directory inside the container
         # If it returns a non-zero exit code or output contains I/O error, it is stale
         local output
-        if ! output=$(docker exec "${container}" ls "${check_path}" 2>&1); then
+        if ! output=$(timeout 5 docker exec "${container}" ls "${check_path}" 2>&1); then
             echo "Stale mount detected in container '${container}' on path '${check_path}': ${output}"
             return 1
         elif [[ "$output" == *"Input/output error"* || "$output" == *"I/O error"* ]]; then
@@ -50,6 +50,11 @@ fi
 
 # Sonarr check
 if [ "$STALE" -eq 0 ] && ! check_container_mount "sonarr" "/data"; then
+    STALE=1
+fi
+
+# qBittorrent check
+if [ "$STALE" -eq 0 ] && ! check_container_mount "qbittorrent" "/data"; then
     STALE=1
 fi
 
