@@ -71,6 +71,7 @@
         widget:
           type: jackett
           url: http://jackett:9117
+          key: "{{HOMEPAGE_VAR_JACKETT_API_KEY}}"
 
     - qBittorrent:
         icon: qbittorrent
@@ -142,6 +143,7 @@
         widget:
           type: uptimekuma
           url: http://uptime-kuma:3001
+          slug: default
 
     - Netdata:
         icon: netdata
