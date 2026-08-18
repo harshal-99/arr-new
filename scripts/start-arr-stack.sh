@@ -49,7 +49,7 @@ wait_for_ip() {
 wait_for_mount() {
     local mount_path="$1"
     local mount_counter=0
-    local mount_max_wait=30
+    local mount_max_wait=120
     
     echo "Waiting for storage mount ($mount_path) to be active..."
     

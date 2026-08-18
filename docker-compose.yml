@@ -384,7 +384,7 @@ services:
       - "8191:8191"
     environment:
       LOG_LEVEL: info
-      # PROXY: socks5://socks5-bridge:1081
+      PROXY_URL: socks5://socks5-bridge:1081
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8191/"]
       interval: 60s
