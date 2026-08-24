@@ -145,12 +145,3 @@
           url: http://uptime-kuma:3001
           slug: default
 
-    - Netdata:
-        icon: netdata
-        href: http://localhost:19999
-        description: System performance
-        server: my-docker
-        container: netdata
-        widget:
-          type: netdata
-          url: http://host.docker.internal:19999
