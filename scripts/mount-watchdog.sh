@@ -2,8 +2,15 @@
 # Mount Watchdog Script for ARR Stack
 # Periodically checks if bind mounts inside Docker containers are stale (Input/output error)
 # and restarts the arr-stack service if needed.
+#
+# Transient network blips (e.g. a router reboot dropping the CIFS mount for a
+# few seconds) can make a single check look stale even though it recovers on
+# its own. Retry a few times with a delay before triggering a full restart.
 
 set -euo pipefail
+
+RETRIES="${MOUNT_WATCHDOG_RETRIES:-3}"
+RETRY_DELAY="${MOUNT_WATCHDOG_RETRY_DELAY:-15}"
 
 # Ensure DOCKER_CONTEXT is set to default if not already set
 export DOCKER_CONTEXT="${DOCKER_CONTEXT:-default}"
@@ -35,32 +42,42 @@ check_container_mount() {
     return 0
 }
 
-# Check mounts in key containers
-STALE=0
+# Run all mount checks once; returns 1 if any container's mount is stale
+run_checks() {
+    local stale=0
 
-# Jellyfin check
-if ! check_container_mount "jellyfin" "/data/media"; then
-    STALE=1
-fi
+    if ! check_container_mount "jellyfin" "/data/media"; then
+        stale=1
+    fi
 
-# Radarr check
-if [ "$STALE" -eq 0 ] && ! check_container_mount "radarr" "/data"; then
-    STALE=1
-fi
+    if [ "$stale" -eq 0 ] && ! check_container_mount "radarr" "/data"; then
+        stale=1
+    fi
 
-# Sonarr check
-if [ "$STALE" -eq 0 ] && ! check_container_mount "sonarr" "/data"; then
-    STALE=1
-fi
+    if [ "$stale" -eq 0 ] && ! check_container_mount "sonarr" "/data"; then
+        stale=1
+    fi
 
-# qBittorrent check
-if [ "$STALE" -eq 0 ] && ! check_container_mount "qbittorrent" "/data"; then
-    STALE=1
-fi
+    if [ "$stale" -eq 0 ] && ! check_container_mount "qbittorrent" "/data"; then
+        stale=1
+    fi
 
-if [ "$STALE" -eq 1 ]; then
-    echo "$(date): Stale mount found! Restarting arr-stack.service..."
-    systemctl --user restart arr-stack.service
-else
-    echo "$(date): All container bind mounts are healthy."
-fi
+    return "$stale"
+}
+
+attempt=1
+while [ "$attempt" -le "$RETRIES" ]; do
+    if run_checks; then
+        echo "$(date): All container bind mounts are healthy."
+        exit 0
+    fi
+
+    if [ "$attempt" -lt "$RETRIES" ]; then
+        echo "$(date): Stale mount check ${attempt}/${RETRIES} failed, retrying in ${RETRY_DELAY}s..."
+        sleep "$RETRY_DELAY"
+    fi
+    attempt=$((attempt + 1))
+done
+
+echo "$(date): Stale mount persisted across ${RETRIES} checks! Restarting arr-stack.service..."
+systemctl --user restart arr-stack.service
