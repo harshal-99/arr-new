@@ -549,6 +549,28 @@ services:
       retries: 3
       start_period: 30s
 
+###############################################
+# DIUN - Docker Image Update Notifier
+###############################################
+  diun:
+    <<: *common-keys
+    container_name: diun
+    image: crazymax/diun:latest
+    command: serve
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/diun:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Asia/Kolkata
+      DIUN_WATCH_WORKERS: 20
+      DIUN_WATCH_SCHEDULE: "0 */6 * * *"
+      DIUN_WATCH_JITTER: 30s
+      DIUN_PROVIDERS_DOCKER: "true"
+      DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT: "true"
+      DIUN_NOTIF_DISCORD_WEBHOOKURL: ${DIUN_DISCORD_WEBHOOK_URL:-}
+      DIUN_NOTIF_DISCORD_RENDERFIELDS: "true"
+
   caddy:
     image: caddy:latest
     container_name: caddy
