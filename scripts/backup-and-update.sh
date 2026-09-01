@@ -130,6 +130,18 @@ chown "$REAL_USER:$REAL_USER" "$BACKUP_FILE"
 echo "Backup created successfully at: $BACKUP_FILE"
 ls -lh "$BACKUP_FILE"
 
+# 4b. Prune old backups, keeping only the most recent 3
+log "Pruning old backups (keeping last 3)..."
+mapfile -t old_backups < <(ls -1t "${BACKUP_DIR}"/arr_backup_*.tar.gz 2>/dev/null | tail -n +4)
+if [ ${#old_backups[@]} -gt 0 ]; then
+  for old_backup in "${old_backups[@]}"; do
+    echo "  - Removing old backup: $old_backup"
+    rm -f "$old_backup"
+  done
+else
+  echo "  Nothing to prune."
+fi
+
 # 5. Pull latest docker images
 log "Step 4: Pulling latest docker images..."
 sudo -u "$REAL_USER" docker --context default compose pull
