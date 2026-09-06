@@ -14,6 +14,8 @@ x-common-keys: &common-keys
   dns:
     - 1.1.1.1
     - 1.0.0.1
+    - 2606:4700:4700::1111
+    - 2606:4700:4700::1001
 
 services:
 ###############################################
@@ -600,3 +602,8 @@ volumes:
 networks:
   default:
     name: arr_network
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+        - subnet: fd00:dead:beef::/64
