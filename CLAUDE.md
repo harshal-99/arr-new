@@ -46,6 +46,8 @@ journalctl --user -u arr-stack.service -f
 ### Network & Identity
 All containers share a single Docker bridge network (`arr_network`). Inter-container communication uses service names as hostnames (e.g., `http://qbittorrent:8080`, `http://prowlarr:9696`). No reverse proxy is configured.
 
+`arr_network` has `enable_ipv6: true` (subnet `fd00:dead:beef::/64`) so containers can fall back to IPv6 egress if IPv4 internet access is down — this is what lets the Tailscale sidecar reach `controlplane.tailscale.com` during an IPv4 outage. `x-common-keys` sets both IPv4 and IPv6 DNS resolvers (`1.1.1.1`/`1.0.0.1` and `2606:4700:4700::1111`/`::1001`) for the same reason. This requires host-level setup that lives outside this repo (see below).
+
 ### Shared Storage Pattern
 All *arr apps and qBittorrent mount the same `/data` host path, enabling hardlinks instead of file copies:
 - `/data/torrents/{movies,tv,music}` — download destination
@@ -79,3 +81,12 @@ Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downlo
 - **Tailscale state** must use a named Docker volume (not a bind mount) to avoid root ownership conflicts
 - The user must be in the `docker` group (`sudo usermod -aG docker $USER`) to run without sudo
 - `profilarr/` directory and `.env` are gitignored
+- **IPv6 support for `arr_network`** requires host-level Docker daemon config, not tracked in this repo. On a fresh host, set this up before `docker compose up`:
+  ```bash
+  # /etc/docker/daemon.json
+  { "ip6tables": true }
+
+  # /etc/sysctl.d/99-docker-ipv6-forward.conf
+  net.ipv6.conf.all.forwarding=1
+  ```
+  Then `sudo sysctl --system && sudo systemctl restart docker`. Without this, `enable_ipv6: true` in `docker-compose.yml` will still bring the network up, but containers won't get NAT66 egress over IPv6.
