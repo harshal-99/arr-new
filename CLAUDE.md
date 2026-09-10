@@ -14,7 +14,8 @@ A Docker Compose-based home media server stack ("ARR stack") running on Linux. I
 - `scripts/start-arr-stack.sh` — boot script that waits for Docker daemon then runs `docker compose up -d`
 - `scripts/backup-and-update.sh` — script to back up configuration, pull updates, and restart services
 - `scripts/restore-backup.sh` — script to restore stack configurations from backups
-- `~/.config/systemd/user/arr-stack.service` — systemd user service for auto-start on boot
+- `systemd/arr-stack.service` — tracked copy of the systemd user service for auto-start on boot; deploy by copying/symlinking to `~/.config/systemd/user/arr-stack.service` then `systemctl --user daemon-reload`
+- `sysctl.d/60-arp-flux-fix.conf` — tracked copy of the ARP-flux fix for the dual-homed (wired + Wi-Fi, same-subnet) host; deploy by copying to `/etc/sysctl.d/60-arp-flux-fix.conf` then `sudo sysctl --system`
 
 ## Common Commands
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=ARR Media Stack
+After=docker.service network-online.target tailscaled.service
+Wants=docker.service network-online.target tailscaled.service
+StartLimitIntervalSec=1800
+StartLimitBurst=5
+
+[Service]
+Type=oneshot
+Environment=DOCKER_CONTEXT=default
+RemainAfterExit=yes
+TimeoutStartSec=8m
+Restart=on-failure
+RestartSec=30s
+ExecStart=/home/harshal/arr-new/scripts/start-arr-stack.sh
+ExecStop=/usr/bin/docker compose -f /home/harshal/arr-new/docker-compose.yml down
+
+[Install]
+WantedBy=default.target
