@@ -13,6 +13,10 @@
 # prolonged NAS outage doesn't cause a restart storm that re-exhausts systemd's
 # start limit. Backoff state lives under XDG_RUNTIME_DIR so it resets naturally
 # across logins/reboots, and clears as soon as things are confirmed healthy again.
+#
+# Alerting goes to an external healthchecks.io check rather than Uptime Kuma,
+# since Uptime Kuma is itself a container in this stack and can't warn you
+# about its own outage.
 
 set -euo pipefail
 
@@ -20,6 +24,15 @@ RETRIES="${MOUNT_WATCHDOG_RETRIES:-3}"
 RETRY_DELAY="${MOUNT_WATCHDOG_RETRY_DELAY:-15}"
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/arr-mount-watchdog.state"
 BACKOFF_LEVELS=(300 900 1800 3600) # 5m, 15m, 30m, 60m (capped)
+HC_URL="https://hc-ping.com/7e967114-a258-4b76-b50c-00ad2565bf68"
+
+ping_ok() {
+    curl -fsS --retry 2 -m 10 "${HC_URL}" >/dev/null 2>&1
+}
+
+ping_fail() {
+    curl -fsS --retry 2 -m 10 --data-raw "$1" "${HC_URL}/fail" >/dev/null 2>&1
+}
 
 # Ensure DOCKER_CONTEXT is set to default if not already set
 export DOCKER_CONTEXT="${DOCKER_CONTEXT:-default}"
@@ -73,12 +86,15 @@ recover_if_failed() {
     if systemctl --user is-failed --quiet arr-stack.service; then
         if ! timeout 5 ls /mnt/hdd/data >/dev/null 2>&1; then
             echo "$(date): arr-stack.service is failed and /mnt/hdd/data is still unreachable. Not recovering yet."
+            ping_fail "arr-stack.service failed; /mnt/hdd/data still unreachable"
             return 1
         fi
         if ! backoff_ready; then
+            ping_fail "arr-stack.service failed; mount healthy but backoff active"
             return 1
         fi
         echo "$(date): arr-stack.service is failed and the mount looks healthy. Clearing failed state and starting..."
+        ping_fail "arr-stack.service was failed; attempting self-recovery"
         systemctl --user reset-failed arr-stack.service
         systemctl --user start arr-stack.service
         record_attempt
@@ -144,6 +160,7 @@ while [ "$attempt" -le "$RETRIES" ]; do
     if run_checks; then
         echo "$(date): All container bind mounts are healthy."
         clear_backoff
+        ping_ok
         exit 0
     fi
 
@@ -155,10 +172,12 @@ while [ "$attempt" -le "$RETRIES" ]; do
 done
 
 if ! backoff_ready; then
+    ping_fail "stale mount persisted across ${RETRIES} checks; backoff active"
     exit 0
 fi
 
 echo "$(date): Stale mount persisted across ${RETRIES} checks! Restarting arr-stack.service..."
+ping_fail "stale mount persisted across ${RETRIES} checks; restarting arr-stack.service"
 systemctl --user reset-failed arr-stack.service 2>/dev/null || true
 systemctl --user restart arr-stack.service
 record_attempt
