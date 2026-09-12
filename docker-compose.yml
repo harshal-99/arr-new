@@ -262,6 +262,29 @@ services:
       start_period: 30s
 
 ###############################################
+# CLEANUPARR - Automatic Download Cleanup
+###############################################
+  cleanuparr:
+    <<: *common-keys
+    container_name: cleanuparr
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    ports:
+      - "11011:11011"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${APPDATA_ROOT:-/docker/appdata}/cleanuparr:/config
+    depends_on:
+      - qbittorrent
+      - radarr
+      - sonarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-L", "http://127.0.0.1:11011/"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+###############################################
 # JELLYFIN - Media Server
 ###############################################
   jellyfin:

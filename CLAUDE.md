@@ -60,7 +60,7 @@ The `hotio/*` images all run as `PUID=1000 / PGID=1000` (defined in `x-common-ke
 `tailscale-jellyfin` uses `network_mode: "service:jellyfin"` — it shares Jellyfin's network namespace so Tailscale exposes Jellyfin on the tailnet. It does **not** inherit `x-common-keys` (runs as root). Its state is stored in a named Docker volume (`tailscale-jellyfin-state`) to avoid host permission issues.
 
 ### Service Dependency Chain
-Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downloads to qBittorrent → completed downloads are hardlinked into `/data/media` → Jellyfin serves from `/data/media` (read-only mount).
+Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downloads to qBittorrent → completed downloads are hardlinked into `/data/media` → Jellyfin serves from `/data/media` (read-only mount). Cleanuparr watches qBittorrent and the Radarr/Sonarr/Lidarr queues, removing stalled, failed, or malicious downloads (config is done via its web UI, not env vars, so it needs no `/data` mount — only API connections to qBittorrent and the *arr apps).
 
 ## Service Ports
 
@@ -75,6 +75,7 @@ Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downlo
 | qBittorrent   | 8080 |
 | Profilarr     | 6868 |
 | FlareSolverr  | 8191 |
+| Cleanuparr    | 11011 |
 
 ## Important Constraints
 
