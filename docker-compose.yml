@@ -52,6 +52,7 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_ACCEPT_DNS=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
     volumes:
       - tailscale-radarr-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
@@ -101,6 +102,7 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_ACCEPT_DNS=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
     volumes:
       - tailscale-sonarr-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
@@ -362,6 +364,7 @@ services:
       - TS_ACCEPT_DNS=false
       - TSD_EXTRA_ARGS=--port=41651
       - TS_SERVE_CONFIG=/config/serve.json
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
     volumes:
       - tailscale-jellyfin-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
@@ -518,6 +521,7 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_ACCEPT_DNS=false
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
     volumes:
       - tailscale-uptime-kuma-state:/var/lib/tailscale
       - /dev/net/tun:/dev/net/tun
