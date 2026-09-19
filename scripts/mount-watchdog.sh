@@ -20,8 +20,8 @@
 
 set -euo pipefail
 
-RETRIES="${MOUNT_WATCHDOG_RETRIES:-3}"
-RETRY_DELAY="${MOUNT_WATCHDOG_RETRY_DELAY:-15}"
+RETRIES="${MOUNT_WATCHDOG_RETRIES:-5}"
+RETRY_DELAY="${MOUNT_WATCHDOG_RETRY_DELAY:-20}"
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/arr-mount-watchdog.state"
 BACKOFF_LEVELS=(300 900 1800 3600) # 5m, 15m, 30m, 60m (capped)
 HC_URL="https://hc-ping.com/7e967114-a258-4b76-b50c-00ad2565bf68"
@@ -113,7 +113,7 @@ check_container_mount() {
         # Try to list the directory inside the container
         # If it returns a non-zero exit code or output contains I/O error, it is stale
         local output
-        if ! output=$(timeout 5 docker exec "${container}" ls "${check_path}" 2>&1); then
+        if ! output=$(timeout 8 docker exec "${container}" ls "${check_path}" 2>&1); then
             echo "Stale mount detected in container '${container}' on path '${check_path}': ${output}"
             return 1
         elif [[ "$output" == *"Input/output error"* || "$output" == *"I/O error"* ]]; then
