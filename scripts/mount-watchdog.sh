@@ -20,9 +20,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
 RETRIES="${MOUNT_WATCHDOG_RETRIES:-5}"
 RETRY_DELAY="${MOUNT_WATCHDOG_RETRY_DELAY:-20}"
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/arr-mount-watchdog.state"
+DIAG_DIR="${MOUNT_WATCHDOG_DIAG_DIR:-${SCRIPT_DIR}/../diagnostics}"
 BACKOFF_LEVELS=(300 900 1800 3600) # 5m, 15m, 30m, 60m (capped)
 HC_URL="https://hc-ping.com/7e967114-a258-4b76-b50c-00ad2565bf68"
 
@@ -124,6 +127,41 @@ check_container_mount() {
     return 0
 }
 
+# Snapshot host/container/CIFS state before restarting, so a restart doesn't
+# destroy the only evidence of what was actually wrong (docker compose down/up
+# recreates every container, wiping their logs). Best-effort only: every
+# command here is short-timeout/non-fatal so a still-stuck mount can't make
+# the capture itself hang the watchdog.
+capture_diagnostics() {
+    mkdir -p "${DIAG_DIR}" 2>/dev/null || return 0
+    local out="${DIAG_DIR}/stale-mount-$(date +%Y%m%d-%H%M%S).log"
+    {
+        echo "=== $(date) - stale mount diagnostic capture ==="
+        echo
+        echo "--- host uptime/load ---"
+        uptime
+        echo
+        echo "--- host CIFS mount ---"
+        mount | grep -i cifs
+        echo
+        echo "--- /proc/fs/cifs/DebugData ---"
+        cat /proc/fs/cifs/DebugData 2>&1
+        echo
+        echo "--- established connections to NAS SMB port ---"
+        ss -tan 2>&1 | grep ':445'
+        echo
+        for c in jellyfin radarr sonarr qbittorrent; do
+            echo "--- container: ${c} ---"
+            docker inspect "${c}" --format 'status={{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}} startedAt={{.State.StartedAt}}' 2>&1
+            timeout 5 docker exec "${c}" sh -c 'uptime' 2>&1
+            echo
+        done
+        echo "--- recent dockerd errors ---"
+        journalctl -u docker.service --since "10 minutes ago" --no-pager 2>&1 | grep -iE "error|broken pipe" | tail -20
+    } > "${out}" 2>&1
+    echo "$(date): Captured pre-restart diagnostics to ${out}"
+}
+
 # Run all mount checks once; returns 1 if any container's mount is stale
 run_checks() {
     local stale=0
@@ -170,6 +208,8 @@ while [ "$attempt" -le "$RETRIES" ]; do
     fi
     attempt=$((attempt + 1))
 done
+
+capture_diagnostics
 
 if ! backoff_ready; then
     ping_fail "stale mount persisted across ${RETRIES} checks; backoff active"

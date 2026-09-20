@@ -2,3 +2,4 @@ profilarr
 .env
 *.log
 jellyfin-serve.json
+diagnostics/
