@@ -46,3 +46,6 @@ http://uptime.localhost, http://uptime.lan {
 http://homepage.localhost, http://homepage.lan {
     reverse_proxy 127.0.0.1:3005
 }
+http://streamystats.localhost, http://streamystats.lan {
+    reverse_proxy 127.0.0.1:3009
+}

@@ -287,6 +287,39 @@ services:
       start_period: 30s
 
 ###############################################
+# STREAMYSTATS - Jellyfin Statistics Dashboard
+###############################################
+  streamystats:
+    <<: *common-keys
+    container_name: streamystats
+    image: ghcr.io/fredrikburmester/streamystats-aio:latest
+    ports:
+      - "3009:3000"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Kolkata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${STREAMYSTATS_POSTGRES_PASSWORD}
+      POSTGRES_DB: streamystats
+      DATABASE_URL: postgresql://postgres:${STREAMYSTATS_POSTGRES_PASSWORD}@localhost:5432/streamystats
+      SESSION_SECRET: ${STREAMYSTATS_SESSION_SECRET}
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${STREAMYSTATS_NEXT_ENCRYPTION_KEY}
+      NODE_ENV: production
+    volumes:
+      - streamystats-data:/var/lib/postgresql/data
+    depends_on:
+      - jellyfin
+    # Postgres needs time to shut down cleanly; the default 10s forces WAL recovery on next start.
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-L", "http://127.0.0.1:3000/api/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+###############################################
 # JELLYFIN - Media Server
 ###############################################
   jellyfin:
@@ -625,6 +658,7 @@ volumes:
   tailscale-sonarr-state:
   tailscale-uptime-kuma-state:
   beszel_socket:
+  streamystats-data:
 
 networks:
   default:
