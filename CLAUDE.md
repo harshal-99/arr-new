@@ -15,6 +15,7 @@ A Docker Compose-based home media server stack ("ARR stack") running on Linux. I
 - `scripts/backup-and-update.sh` — script to back up configuration, pull updates, and restart services
 - `scripts/restore-backup.sh` — script to restore stack configurations from backups
 - `systemd/arr-stack.service` — tracked copy of the systemd user service for auto-start on boot; deploy by copying/symlinking to `~/.config/systemd/user/arr-stack.service` then `systemctl --user daemon-reload`
+- `scripts/ping-logger.sh` + `systemd/arr-ping-logger.service` — always-on logger that pings gateway/NAS/1.1.1.1 every 5s into `diagnostics/ping/ping-YYYY-MM-DD.csv` (14-day retention), and on a loss streak logs to the journal and asks the NAS (via `ssh nas`) whether it can reach the WAN too — to localise partial-packet-loss outages; deploy by symlinking into `~/.config/systemd/user/` then `systemctl --user enable --now arr-ping-logger.service`
 - `sysctl.d/60-arp-flux-fix.conf` — tracked copy of the ARP-flux fix for the dual-homed (wired + Wi-Fi, same-subnet) host; deploy by copying to `/etc/sysctl.d/60-arp-flux-fix.conf` then `sudo sysctl --system`
 
 ## Common Commands

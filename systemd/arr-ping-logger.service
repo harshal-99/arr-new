@@ -1,0 +1,11 @@
+[Unit]
+Description=Continuous ping logger (gateway/NAS/WAN loss + RTT) for outage forensics
+After=network-online.target
+
+[Service]
+ExecStart=/home/harshal/arr-new/scripts/ping-logger.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
