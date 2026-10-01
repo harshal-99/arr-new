@@ -1,0 +1,7 @@
+[localmonitor]
+    password = ${NUT_LOCALMONITOR_PASSWORD}
+    upsmon master
+
+[nasmonitor]
+    password = ${NUT_NASMONITOR_PASSWORD}
+    upsmon slave
