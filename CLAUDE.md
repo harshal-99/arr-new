@@ -2,14 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Repository conventions (style, validation, commits, Docker context) are in @AGENTS.md.
+
 ## What This Repo Is
 
-A Docker Compose-based home media server stack ("ARR stack") running on Linux. It orchestrates automated media acquisition (Radarr, Sonarr, Lidarr), downloading (qBittorrent), indexing (Prowlarr), subtitles (Bazarr), media serving (Jellyfin), and remote access (Tailscale).
+A Docker Compose-based home media server stack ("ARR stack") running on Linux. It orchestrates automated media acquisition (Radarr, Sonarr; Lidarr is defined but commented out), downloading (qBittorrent), indexing (Prowlarr), subtitles (Bazarr), media serving (Jellyfin), and remote access (Tailscale).
 
 ## Key Files
 
 - `docker-compose.yml` — the entire stack definition; this is the primary file to edit
-- `.env` — secrets (gitignored); only `TS_AUTHKEY` is required (for Tailscale)
+- `.env` — secrets (gitignored); `.env.sample` lists every variable — `TS_AUTHKEY` (Tailscale) and the `STREAMYSTATS_*` secrets are required, the rest are optional or used by specific scripts
 - `.env.sample` — template showing required env vars
 - `scripts/start-arr-stack.sh` — boot script that waits for Docker daemon then runs `docker compose up -d`
 - `scripts/backup-and-update.sh` — script to back up configuration, pull updates, and restart services
@@ -48,7 +50,7 @@ journalctl --user -u arr-stack.service -f
 ## Architecture
 
 ### Network & Identity
-All containers share a single Docker bridge network (`arr_network`). Inter-container communication uses service names as hostnames (e.g., `http://qbittorrent:8080`, `http://prowlarr:9696`). No reverse proxy is configured.
+Containers share a single Docker bridge network (`arr_network`), except `caddy`, `beszel-agent` and `vps-proxy-tunnel`, which use `network_mode: host`, and the Tailscale sidecars, which join their app's network namespace. Inter-container communication uses service names as hostnames (e.g., `http://qbittorrent:8080`, `http://prowlarr:9696`). Caddy (`caddy` service, config in `caddy/Caddyfile`) is the reverse proxy.
 
 `arr_network` has `enable_ipv6: true` (subnet `fd00:dead:beef::/64`) so containers can fall back to IPv6 egress if IPv4 internet access is down — this is what lets the Tailscale sidecar reach `controlplane.tailscale.com` during an IPv4 outage. `x-common-keys` sets both IPv4 and IPv6 DNS resolvers (`1.1.1.1`/`1.0.0.1` and `2606:4700:4700::1111`/`::1001`) for the same reason. This requires host-level setup that lives outside this repo (see below).
 
@@ -59,11 +61,11 @@ All *arr apps and qBittorrent mount the same `/data` host path, enabling hardlin
 
 The `hotio/*` images all run as `PUID=1000 / PGID=1000` (defined in `x-common-keys`). Host paths under `/docker/appdata/<service>` store per-service config.
 
-### Tailscale Sidecar
-`tailscale-jellyfin` uses `network_mode: "service:jellyfin"` — it shares Jellyfin's network namespace so Tailscale exposes Jellyfin on the tailnet. It does **not** inherit `x-common-keys` (runs as root). Its state is stored in a named Docker volume (`tailscale-jellyfin-state`) to avoid host permission issues.
+### Tailscale Sidecars
+`tailscale-jellyfin`, `tailscale-radarr`, `tailscale-sonarr` and `tailscale-uptime-kuma` each use `network_mode: "service:<app>"` — sharing that app's network namespace so Tailscale exposes it on the tailnet. They do **not** inherit `x-common-keys` (run as root). Each keeps its state in a named Docker volume (`tailscale-<app>-state`) to avoid host permission issues.
 
 ### Service Dependency Chain
-Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downloads to qBittorrent → completed downloads are hardlinked into `/data/media` → Jellyfin serves from `/data/media` (read-only mount). Cleanuparr watches qBittorrent and the Radarr/Sonarr/Lidarr queues, removing stalled, failed, or malicious downloads (config is done via its web UI, not env vars, so it needs no `/data` mount — only API connections to qBittorrent and the *arr apps). Streamystats pulls watch statistics from Jellyfin's API (server URL + API key entered through its own setup wizard on first login, not an env var) and needs its own Postgres instance, which the `streamystats-aio` image bundles in-container — its data lives in the named volume `streamystats-data` rather than a `/docker/appdata` bind mount, since that Postgres process runs as root (same reasoning as the Tailscale state volumes).
+Prowlarr manages indexers → syncs to Radarr/Sonarr → they push downloads to qBittorrent → completed downloads are hardlinked into `/data/media` → Jellyfin serves from `/data/media` (read-only mount). Cleanuparr watches qBittorrent and the Radarr/Sonarr queues, removing stalled, failed, or malicious downloads (config is done via its web UI, not env vars, so it needs no `/data` mount — only API connections to qBittorrent and the *arr apps). Streamystats pulls watch statistics from Jellyfin's API (server URL + API key entered through its own setup wizard on first login, not an env var) and needs its own Postgres instance, which the `streamystats-aio` image bundles in-container — its data lives in the named volume `streamystats-data` rather than a `/docker/appdata` bind mount, since that Postgres process runs as root (same reasoning as the Tailscale state volumes).
 
 ## Service Ports
 
@@ -72,7 +74,6 @@ Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downlo
 | Jellyfin      | 8096 |
 | Radarr        | 7878 |
 | Sonarr        | 8989 |
-| Lidarr        | 8686 |
 | Bazarr        | 6767 |
 | Prowlarr      | 9696 |
 | qBittorrent   | 8080 |
@@ -80,6 +81,14 @@ Prowlarr manages indexers → syncs to Radarr/Sonarr/Lidarr → they push downlo
 | FlareSolverr  | 8191 |
 | Cleanuparr    | 11011 |
 | Streamystats  | 3009 |
+| Jackett       | 9117 |
+| Seerr         | 5055 |
+| Tdarr         | 8265 |
+| AdGuard Home  | 3000 (setup), 8085 (UI), 53 on 192.168.0.19 |
+| Beszel        | 8090 |
+| Uptime Kuma   | 3001 |
+| Homepage      | 3005 |
+| Caddy         | 80 (host network; `*.localhost` / `*.lan` names) |
 
 ## Important Constraints
 

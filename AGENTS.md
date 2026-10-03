@@ -36,7 +36,7 @@ Prefer grouped, commented sections in Compose for readability. Keep repeated set
 There is no automated unit-test suite in this repository. Treat `docker compose config --quiet` as the minimum validation step. For behavior changes, bring the affected service up and inspect logs with `docker compose logs -f <service>` to confirm the container starts and mounts resolve correctly.
 
 ## Commit & Pull Request Guidelines
-Recent history includes vague messages such as `commit`; do not continue that pattern. Use short, imperative subjects that describe the change, for example `add Jellyfin Tailscale sidecar` or `fix Profilarr config mount`.
+Use short, imperative subjects that describe the change, for example `add Jellyfin Tailscale sidecar` or `fix Profilarr config mount`.
 
 PRs should include:
 
