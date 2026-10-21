@@ -48,6 +48,18 @@ systemctl --user status arr-stack.service
 journalctl --user -u arr-stack.service -f
 ```
 
+## Outage Diagnosis
+
+When internet, NAS or service downtime is reported, gather evidence before naming a cause: `diagnostics/ping/` CSVs, the NAS watchdog log, `ethtool -S` on both ends, sysstat, `sensors`, and `journalctl -b -1` for the previous boot. Then lay out 2–3 competing hypotheses with the evidence for and against each, and keep them all open until the evidence rules the others out.
+
+- Topology: router → 2.5G switch → NAS / this host. If other devices stayed online, the ISP and router are unlikely to be the cause.
+- If there's an abrupt gap in the logs, ask whether the user force-shut a frozen host before concluding the power was lost.
+- If the breakage started after an Ubuntu release upgrade, start with `scripts/check-samba.sh` and `sudo scripts/configure-ups.sh`, because upgrades replace `/etc/samba/smb.conf` and `/etc/nut/*` with stock files.
+
+## Service APIs
+
+- Jellyfin authenticates with `Authorization: MediaBrowser Token="$JELLYFIN_API_KEY"`. The legacy `X-Emby-Token` header returns 401.
+
 ## Architecture
 
 ### Network & Identity

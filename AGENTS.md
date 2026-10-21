@@ -38,6 +38,8 @@ There is no automated unit-test suite in this repository. Treat `docker compose 
 ## Commit & Pull Request Guidelines
 Use short, imperative subjects that describe the change, for example `add Jellyfin Tailscale sidecar` or `fix Profilarr config mount`.
 
+Commit and push directly to `master`; this repo's owner works without feature branches. The PR notes below apply only when a PR is explicitly requested.
+
 PRs should include:
 
 - a brief summary of the operational change
