@@ -179,6 +179,18 @@ services:
       UPSTREAM_USER: ${SOCKS5_UPSTREAM_USER:-prowlarr}
       UPSTREAM_PASS: ${SOCKS5_UPSTREAM_PASS}
 
+  # HTTP proxy front-end for socks5-bridge, for Jackett. Jackett's SOCKS5 mode
+  # (SocksWebProxy) breaks every HTTPS indexer with "corrupted frame", but
+  # its HTTP proxy mode works: Jackett -> http://socks-http-proxy:8888 ->
+  # socks5-bridge:1081 -> VPS. Internal only; no published port.
+  socks-http-proxy:
+    image: gogost/gost:latest
+    container_name: socks-http-proxy
+    restart: unless-stopped
+    command: -L http://:8888 -F socks5://socks5-bridge:1081
+    depends_on:
+      - socks5-bridge
+
 ###############################################
 # PROWLARR - Indexer Manager
 ###############################################
