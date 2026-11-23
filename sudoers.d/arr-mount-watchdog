@@ -1,0 +1,5 @@
+# Lets the arr mount watchdog (scripts/mount-watchdog.sh, run as harshal by
+# arr-mount-watchdog.service) lazily unmount a wedged NAS CIFS mount without a
+# password. Only this exact command line is allowed.
+# Deploy: sudo install -m 440 -o root -g root sudoers.d/arr-mount-watchdog /etc/sudoers.d/arr-mount-watchdog && sudo visudo -c
+harshal ALL=(root) NOPASSWD: /usr/bin/umount -l /mnt/hdd/data
