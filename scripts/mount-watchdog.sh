@@ -19,6 +19,13 @@
 # automount makes a fresh connection. The unmount needs root; it runs as
 # `sudo -n` and needs the sudoers rule in sudoers.d/arr-mount-watchdog.
 #
+# The unmount only runs when a CIFS filesystem is really mounted there. With
+# just the automount (autofs) in place, `umount -l` would remove the automount
+# itself, and nothing would ever mount the NAS again. For the same reason a
+# path only counts as healthy when CIFS is mounted on it: without that, the bare
+# directories underneath on the root disk answer too. Re-arming a lost automount
+# needs root, so that case is only reported, with the command to run.
+#
 # Restart/recovery attempts back off exponentially (5m/15m/30m/60m, capped) so a
 # prolonged NAS outage doesn't cause a restart storm that re-exhausts systemd's
 # start limit. Backoff state lives under XDG_RUNTIME_DIR so it resets naturally
@@ -40,6 +47,7 @@ STATE_FILE="${RUNTIME_DIR}/arr-mount-watchdog.state"
 PROBE_PID_FILE="${RUNTIME_DIR}/arr-mount-watchdog.probe.pid"
 DIAG_DIR="${MOUNT_WATCHDOG_DIAG_DIR:-${SCRIPT_DIR}/../diagnostics}"
 MOUNT_PATH="${MOUNT_WATCHDOG_MOUNT_PATH:-/mnt/hdd/data}"
+MOUNTS_FILE="${MOUNT_WATCHDOG_MOUNTS_FILE:-/proc/mounts}"
 NAS_HOST="${MOUNT_WATCHDOG_NAS_HOST:-192.168.0.18}"
 PROBE_TIMEOUT="${MOUNT_WATCHDOG_PROBE_TIMEOUT:-10}"
 BACKOFF_LEVELS=(300 900 1800 3600) # 5m, 15m, 30m, 60m (capped)
@@ -108,7 +116,29 @@ run_detached() {
     return "${rc}"
 }
 
-# Returns 0 if the host-side mount answers, 1 if it is hung or erroring.
+# Returns 0 if a filesystem of type $1 is mounted at MOUNT_PATH. Reads the
+# mount table only, so it can't hang on a dead mount.
+mounted_as() {
+    awk -v path="${MOUNT_PATH}" -v type="$1" \
+        '$2 == path && $3 == type { found = 1 } END { exit !found }' "${MOUNTS_FILE}"
+}
+
+# Returns 0 if neither CIFS nor the automount is in place, i.e. nothing will
+# mount the NAS again until the automount unit is started (needs root).
+automount_missing() {
+    ! mounted_as cifs && ! mounted_as autofs
+}
+
+report_automount_missing() {
+    local unit
+    unit="$(systemd-escape --path --suffix=automount "${MOUNT_PATH}")"
+    local msg="${MOUNT_PATH}: automount is gone. Run: sudo systemctl reset-failed ${unit%.automount}.mount ${unit}; sudo systemctl start ${unit}"
+    echo "$(date): ${msg}"
+    ping_fail "${msg}"
+}
+
+# Returns 0 if CIFS is mounted on the host and answers, 1 if it is not mounted,
+# hung or erroring.
 # Stats a subdirectory so the automount gets triggered. An earlier probe that
 # is still stuck (recorded in PROBE_PID_FILE) means the mount is still hung,
 # so no new probe is started; that keeps one stuck process at most, not one
@@ -134,7 +164,9 @@ host_mount_ok() {
         sleep 1
         waited=$((waited + 1))
     done
-    wait "${pid}"
+    wait "${pid}" || return 1
+    # Checked after the stat, which triggers the automount.
+    mounted_as cifs
 }
 
 nas_smb_reachable() {
@@ -157,6 +189,11 @@ unwedge_host_mount() {
     if [[ "${#containers[@]}" -gt 0 ]]; then
         echo "$(date): Killing containers that hold ${MOUNT_PATH}: ${containers[*]}"
         run_detached 30 docker kill "${containers[@]}" || true
+    fi
+
+    if ! mounted_as cifs; then
+        echo "$(date): No CIFS mounted at ${MOUNT_PATH}; not unmounting, that would remove the automount."
+        return 0
     fi
 
     echo "$(date): Lazily unmounting ${MOUNT_PATH}..."
@@ -281,7 +318,7 @@ HOST_MOUNT_HUNG=0
 run_checks() {
     HOST_MOUNT_HUNG=0
     if ! host_mount_ok; then
-        echo "Host mount ${MOUNT_PATH} is hung or erroring."
+        echo "Host mount ${MOUNT_PATH} is not mounted, hung or erroring."
         HOST_MOUNT_HUNG=1
         return 1
     fi
@@ -302,6 +339,12 @@ main() {
     # Ensure we can communicate with Docker
     if ! docker info >/dev/null 2>&1; then
         echo "$(date): Error: Cannot connect to Docker daemon using context '${DOCKER_CONTEXT}'."
+        exit 0
+    fi
+
+    # No restart can help here, and the bare directory must not pass as healthy.
+    if automount_missing; then
+        report_automount_missing
         exit 0
     fi
 
