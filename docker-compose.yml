@@ -362,6 +362,10 @@ services:
     <<: *common-keys
     image: ghcr.io/haveagitgat/tdarr
     container_name: tdarr
+    # Cap the internal node's ffmpeg workers at half of the N150's 4 cores:
+    # sustained full-CPU transcoding pinned the package at 93-95 C and the
+    # host froze silently (2026-09-26, 2026-11-27). Raise once cooling is fixed.
+    cpus: "2"
     group_add:
       - "992"  # render
       - "44"   # video
